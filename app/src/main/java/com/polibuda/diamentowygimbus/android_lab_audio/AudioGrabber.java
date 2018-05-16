@@ -42,7 +42,7 @@ public class AudioGrabber implements Runnable {
         else return null;
     }
 
-    void startRecord(){
+    private void startRecord(){
         this.audioRecord = new AudioRecord(MediaRecorder.AudioSource.MIC, 44100,
                 AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, bufferSize);
         this.recordStopper = true;
@@ -60,8 +60,8 @@ public class AudioGrabber implements Runnable {
         int arraySize = shortData.length;
         byte[] bytes = new byte[arraySize*2];
         for (int i = 0; i < arraySize; i++){
-            bytes[i*2] = (byte) (shortData[i] & 0x00FF);
-            bytes[(i*2)+1] = (byte) (shortData[i] >> 8);
+            bytes[i*2] = (byte) (shortData[i] & 0xFF);
+            bytes[(i*2)+1] = (byte) ((shortData[i] >> 8) & 0xff);
         }
         return bytes;
     }

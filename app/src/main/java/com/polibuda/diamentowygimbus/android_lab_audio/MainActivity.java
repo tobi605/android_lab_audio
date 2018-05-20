@@ -1,9 +1,10 @@
 package com.polibuda.diamentowygimbus.android_lab_audio;
 
 
+import android.content.Intent;
+import android.os.Bundle;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,7 +17,7 @@ import java.util.Date;
 public class MainActivity extends AppCompatActivity {
 
     private EditText surnameEdit, nameEdit, titleEdit, notesEdit;
-    private Button startButton, stopButton, eraseButton, saveButton;
+    private Button startButton, stopButton, eraseButton, saveButton, listButton;
     private TextView statusText;
     private Recorder recorder;
     private File file;
@@ -34,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private void initFileSystem() {
         String filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getPath();
         this.file = new File(filePath, "Voice Notes");
-        if(!file.exists()) file.mkdir();
+        if (!file.exists()) file.mkdir();
     }
 
     private void initElements() {
@@ -48,20 +49,24 @@ public class MainActivity extends AppCompatActivity {
         stopButton.setEnabled(false);
         eraseButton = findViewById(R.id.eraseButton);
         saveButton = findViewById(R.id.saveButton);
+        listButton = findViewById(R.id.listButton);
 
         statusText = findViewById(R.id.recordStatus);
+    }
+
+    private void clearInputs() {
+        surnameEdit.setText("");
+        nameEdit.setText("");
+        titleEdit.setText("");
+        notesEdit.setText("");
     }
 
     private void initListeners() {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                recorder.setSurname(String.valueOf(surnameEdit.getText()));
-                recorder.setName(String.valueOf(nameEdit.getText()));
-                recorder.setTitle(String.valueOf(titleEdit.getText()));
-                recorder.setNote(String.valueOf(notesEdit.getText()));
                 statusText.setText("Nagrywam...");
-                String date = new SimpleDateFormat("HH-mm_dd-MM-yyyy").format(new Date());
+                String date = new SimpleDateFormat("HH:mm:ss dd-MM-yyyy").format(new Date());
                 recorder.setDate(date);
                 recorder.startRecording(date);
                 startButton.setEnabled(false);
@@ -86,15 +91,27 @@ public class MainActivity extends AppCompatActivity {
                 statusText.setText("Skasowano, gotowy na nowe nagranie");
                 eraseButton.setVisibility(View.INVISIBLE);
                 saveButton.setVisibility(View.INVISIBLE);
+                clearInputs();
             }
         });
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                recorder.setSurname(String.valueOf(surnameEdit.getText()));
+                recorder.setName(String.valueOf(nameEdit.getText()));
+                recorder.setTitle(String.valueOf(titleEdit.getText()));
+                recorder.setNote(String.valueOf(notesEdit.getText()));
                 recorder.saveFile();
                 statusText.setText("Zapisano do pliku");
                 eraseButton.setVisibility(View.INVISIBLE);
                 saveButton.setVisibility(View.INVISIBLE);
+                clearInputs();
+            }
+        });
+        listButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, ListActivity.class));
             }
         });
     }

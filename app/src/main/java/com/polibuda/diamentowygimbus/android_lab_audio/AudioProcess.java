@@ -1,7 +1,6 @@
 package com.polibuda.diamentowygimbus.android_lab_audio;
 
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -20,48 +19,7 @@ public class AudioProcess implements Runnable {
         this.processStopper = true;
     }
 
-    void setFilePath(String filePath){
-        this.filePath = filePath;
-    }
-
-    String getFilePath(){ return this.filePath; }
-
-    @Override
-    public void run() {
-        startProcess();
-    }
-
-    void startProcess(){
-        this.processStopper = true;
-    }
-
-    void stopProcess(){
-        this.processStopper = false;
-    }
-
-    void saveToFile(String date, String surname, String name, String title, String notes) throws IOException {
-        FileOutputStream outputStream = new FileOutputStream(filePath+".wav");
-        int audioSize = 0;
-        for (byte[] chunk: this.queue) {
-            audioSize+=chunk.length;
-        }
-        byte[] header = wavFileHeader(audioSize, audioSize+36, 44100, 1, 88200);
-        outputStream.write(header);
-        for (byte[] chunk : this.queue) {
-            outputStream.write(chunk);
-        }
-        outputStream.close();
-        saveInfoFile(date, surname, name, title, notes);
-        clear();
-    }
-
-    void clear(){
-        this.queue.clear();
-        this.processed.clear();
-        this.filePath = null;
-    }
-
-    static byte[] wavFileHeader(long totalAudioLen, long totalDataLen, long sampleRate, int channels, long byteRate){
+    static byte[] wavFileHeader(long totalAudioLen, long totalDataLen, long sampleRate, int channels, long byteRate) {
         byte[] header = new byte[44];
         header[0] = 'R';  // RIFF/WAVE header
         header[1] = 'I';
@@ -111,8 +69,51 @@ public class AudioProcess implements Runnable {
         return header;
     }
 
-    void saveInfoFile(String date, String surname, String name, String title, String notes) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(filePath+".info"));
+    String getFilePath() {
+        return this.filePath;
+    }
+
+    void setFilePath(String filePath) {
+        this.filePath = filePath;
+    }
+
+    @Override
+    public void run() {
+        startProcess();
+    }
+
+    private void startProcess() {
+        this.processStopper = true;
+    }
+
+    void stopProcess() {
+        this.processStopper = false;
+    }
+
+    void saveToFile(String date, String surname, String name, String title, String notes) throws IOException {
+        FileOutputStream outputStream = new FileOutputStream(filePath + ".wav");
+        int audioSize = 0;
+        for (byte[] chunk : this.queue) {
+            audioSize += chunk.length;
+        }
+        byte[] header = wavFileHeader(audioSize, audioSize + 36, 44100, 1, 88200);
+        outputStream.write(header);
+        for (byte[] chunk : this.queue) {
+            outputStream.write(chunk);
+        }
+        outputStream.close();
+        saveInfoFile(date, surname, name, title, notes);
+        clear();
+    }
+
+    void clear() {
+        this.queue.clear();
+        this.processed.clear();
+        this.filePath = null;
+    }
+
+    private void saveInfoFile(String date, String surname, String name, String title, String notes) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(filePath + ".info"));
         String separate = ";";
         writer.write(date);
         writer.write(separate);
@@ -123,6 +124,7 @@ public class AudioProcess implements Runnable {
         writer.write(title);
         writer.write(separate);
         writer.write(notes);
+        writer.flush();
         writer.close();
     }
 }

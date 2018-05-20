@@ -18,18 +18,18 @@ public class Recorder {
         this.process = new AudioProcess(bufferQueue);
     }
 
-    void startRecording(String filePath){
-        this.process.setFilePath(this.folderPath+filePath);
+    void startRecording(String filePath) {
+        this.process.setFilePath(this.folderPath + "/VoiceNote " + filePath);
         (new Thread(this.grabber)).start();
         (new Thread(this.process)).start();
     }
 
-    void stopRecording(){
+    void stopRecording() {
         this.grabber.stopRecord();
         this.process.stopProcess();
     }
 
-    void saveFile(){
+    void saveFile() {
         try {
             this.process.saveToFile(this.getDate(), this.getSurname(), this.getName(), this.getTitle(), this.getNote());
         } catch (IOException e) {
@@ -37,7 +37,7 @@ public class Recorder {
         }
     }
 
-    void clear(){
+    void clear() {
         this.process.clear();
     }
 

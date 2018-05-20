@@ -11,13 +11,11 @@ public class AudioGrabber implements Runnable {
     private AudioRecord audioRecord;
     private boolean recordStopper;
     private int bufferSize;
-    private int shortsRead;
 
     AudioGrabber(LinkedBlockingQueue<byte[]> queue) {
         this.queue = queue;
         this.bufferSize = AudioRecord.getMinBufferSize(44100, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
         this.recordStopper = true;
-        this.shortsRead = 0;
     }
 
     @Override
@@ -25,7 +23,8 @@ public class AudioGrabber implements Runnable {
         startRecord();
         while (recordStopper){
             try {
-                queue.put(getNextBlock());
+                byte[] nextBlock = getNextBlock();
+                if(nextBlock!=null) queue.put(getNextBlock().clone());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -33,13 +32,9 @@ public class AudioGrabber implements Runnable {
     }
 
     private byte[] getNextBlock(){
-        short[] buffer = new short[bufferSize];
+        byte[] buffer = new byte[bufferSize];
         int returnCode = audioRecord.read(buffer, 0, bufferSize);
-        if(returnCode>=0){
-            shortsRead+=returnCode;
-            return short2byte(buffer);
-        }
-        else return null;
+        return (returnCode>=0) ? buffer : null;
     }
 
     private void startRecord(){
@@ -54,15 +49,5 @@ public class AudioGrabber implements Runnable {
         this.audioRecord.stop();
         this.audioRecord.release();
         this.audioRecord = null;
-    }
-
-    private byte[] short2byte(short[] shortData){
-        int arraySize = shortData.length;
-        byte[] bytes = new byte[arraySize*2];
-        for (int i = 0; i < arraySize; i++){
-            bytes[i*2] = (byte) (shortData[i] & 0xFF);
-            bytes[(i*2)+1] = (byte) ((shortData[i] >> 8) & 0xff);
-        }
-        return bytes;
     }
 }

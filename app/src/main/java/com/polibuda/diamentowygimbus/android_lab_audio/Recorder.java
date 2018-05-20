@@ -31,7 +31,7 @@ public class Recorder {
 
     void saveFile(){
         try {
-            this.process.saveToFile();
+            this.process.saveToFile(this.getDate(), this.getSurname(), this.getName(), this.getTitle(), this.getNote());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -71,5 +71,13 @@ public class Recorder {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 }

@@ -20,17 +20,21 @@ public class MainActivity extends AppCompatActivity {
     private TextView statusText;
     private Recorder recorder;
     private File file;
-    private boolean wasRecording;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        this.file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC), "voice_notes/");
+        initFileSystem();
         this.recorder = new Recorder(file.getAbsolutePath());
-        this.wasRecording = false;
         initElements();
         initListeners();
+    }
+
+    private void initFileSystem() {
+        String filePath = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC).getPath();
+        this.file = new File(filePath, "Voice Notes");
+        if(!file.exists()) file.mkdir();
     }
 
     private void initElements() {
@@ -41,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
 
         startButton = findViewById(R.id.startButton);
         stopButton = findViewById(R.id.stopButton);
+        stopButton.setEnabled(false);
         eraseButton = findViewById(R.id.eraseButton);
         saveButton = findViewById(R.id.saveButton);
 
@@ -55,35 +60,41 @@ public class MainActivity extends AppCompatActivity {
                 recorder.setName(String.valueOf(nameEdit.getText()));
                 recorder.setTitle(String.valueOf(titleEdit.getText()));
                 recorder.setNote(String.valueOf(notesEdit.getText()));
-                statusText.setText("Recording...");
+                statusText.setText("Nagrywam...");
                 String date = new SimpleDateFormat("HH-mm_dd-MM-yyyy").format(new Date());
+                recorder.setDate(date);
                 recorder.startRecording(date);
-                wasRecording = true;
+                startButton.setEnabled(false);
+                stopButton.setEnabled(true);
             }
         });
         stopButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 recorder.stopRecording();
-                statusText.setText("Stopped recording");
-                if(wasRecording){
-                    eraseButton.setVisibility(View.VISIBLE);
-                    saveButton.setVisibility(View.VISIBLE);
-                }
+                statusText.setText("Zatrzymano nagrywanie");
+                eraseButton.setVisibility(View.VISIBLE);
+                saveButton.setVisibility(View.VISIBLE);
+                stopButton.setEnabled(false);
+                startButton.setEnabled(true);
             }
         });
         eraseButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 recorder.clear();
-                statusText.setText("Erased, ready to record");
+                statusText.setText("Skasowano, gotowy na nowe nagranie");
+                eraseButton.setVisibility(View.INVISIBLE);
+                saveButton.setVisibility(View.INVISIBLE);
             }
         });
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 recorder.saveFile();
-                statusText.setText("Saved to file");
+                statusText.setText("Zapisano do pliku");
+                eraseButton.setVisibility(View.INVISIBLE);
+                saveButton.setVisibility(View.INVISIBLE);
             }
         });
     }

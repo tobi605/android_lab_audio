@@ -1,6 +1,9 @@
 package com.polibuda.diamentowygimbus.android_lab_audio;
 
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -26,7 +29,6 @@ public class AudioProcess implements Runnable {
     @Override
     public void run() {
         startProcess();
-
     }
 
     void startProcess(){
@@ -37,14 +39,19 @@ public class AudioProcess implements Runnable {
         this.processStopper = false;
     }
 
-    void saveToFile() throws IOException {
+    void saveToFile(String date, String surname, String name, String title, String notes) throws IOException {
         FileOutputStream outputStream = new FileOutputStream(filePath+".wav");
-        byte[] header = wavFileHeader(this.processed.size(), this.processed.size()+36, 44100, 1, 88200);
+        int audioSize = 0;
+        for (byte[] chunk: this.queue) {
+            audioSize+=chunk.length;
+        }
+        byte[] header = wavFileHeader(audioSize, audioSize+36, 44100, 1, 88200);
         outputStream.write(header);
         for (byte[] chunk : this.queue) {
-            outputStream.write(chunk,0, chunk.length);
+            outputStream.write(chunk);
         }
         outputStream.close();
+        saveInfoFile(date, surname, name, title, notes);
         clear();
     }
 
@@ -54,7 +61,7 @@ public class AudioProcess implements Runnable {
         this.filePath = null;
     }
 
-    private byte[] wavFileHeader(long totalAudioLen, long totalDataLen, long sampleRate, int channels, long byteRate){
+    static byte[] wavFileHeader(long totalAudioLen, long totalDataLen, long sampleRate, int channels, long byteRate){
         byte[] header = new byte[44];
         header[0] = 'R';  // RIFF/WAVE header
         header[1] = 'I';
@@ -102,5 +109,20 @@ public class AudioProcess implements Runnable {
         header[43] = (byte) ((totalAudioLen >> 24) & 0xff);
 
         return header;
+    }
+
+    void saveInfoFile(String date, String surname, String name, String title, String notes) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(filePath+".info"));
+        String separate = ";";
+        writer.write(date);
+        writer.write(separate);
+        writer.write(surname);
+        writer.write(separate);
+        writer.write(name);
+        writer.write(separate);
+        writer.write(title);
+        writer.write(separate);
+        writer.write(notes);
+        writer.close();
     }
 }

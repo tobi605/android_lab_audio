@@ -52,7 +52,7 @@ class VoiceNoteAdapter extends ArrayAdapter<VoiceNote> {
             @Override
             public void onClick(View v) {
                 try {
-                    current.playNote(getContext());
+                    current.playNote();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

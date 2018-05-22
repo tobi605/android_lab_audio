@@ -1,6 +1,5 @@
 package com.polibuda.diamentowygimbus.android_lab_audio;
 
-import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
@@ -34,7 +33,7 @@ public class VoiceNote {
         this.selected = false;
     }
 
-    void playNote(Context context) throws IOException {
+    void playNote() throws IOException {
         FileInputStream reader = new FileInputStream(this.audioFilePath);
         reader.skip(44); //skip header
         int bufferSize = AudioRecord.getMinBufferSize
